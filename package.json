@@ -1,0 +1,11 @@
+{
+  "name": "incolballet-educa",
+  "version": "1.0.0",
+  "description": "Plataforma educativa de INCOLBALLET: Ballet Clásico, Danza Contemporánea y Folclor",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "preview": "node tools/build-preview.js"
+  },
+  "engines": { "node": ">=18" }
+}
