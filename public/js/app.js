@@ -333,10 +333,10 @@
           <legend>${i + 1}. ${esc(q.q)}</legend>
           ${q.o.map((o, j) => {
             let cls = '';
-            if (review) { if (j === q.a) cls = 'correct'; else if (review[i].chosen === j) cls = 'wrong'; }
+            if (review) { if (j === review[i].answer) cls = 'correct'; else if (review[i].chosen === j) cls = 'wrong'; }
             return `<label class="opt ${cls}"><input type="radio" name="q${i}" value="${j}" ${review && review[i].chosen === j ? 'checked' : ''}><span>${esc(o)}</span></label>`;
           }).join('')}
-          ${review ? `<p class="explain">${review[i].ok ? '✓ Correcta.' : '✗ Incorrecta.'} ${esc(q.e)}</p>` : ''}
+          ${review ? `<p class="explain">${review[i].ok ? '✓ Correcta.' : '✗ Incorrecta.'} ${esc(review[i].explain)}</p>` : ''}
         </fieldset></div>`).join('')}
         ${res ? '' : `<div class="sticky-submit"><span class="muted num" id="answered">0 de ${m.quiz.length} respondidas</span><button class="btn" type="submit" id="quizSubmit" disabled>Enviar evaluación</button></div>`}
       </form>
@@ -496,7 +496,7 @@
       <div class="toolbar">
         <input class="input" id="st-q" type="search" placeholder="Buscar por nombre o usuario" value="${esc(S.params.q || '')}" aria-label="Buscar estudiante">
         <select class="input" id="st-grade" style="flex:0 1 160px" aria-label="Filtrar por grado"><option value="">Todos los grados</option>${grades.map(g => `<option ${g === grade ? 'selected' : ''}>${esc(g)}</option>`).join('')}</select>
-        <button class="btn ghost small" id="exportBtn" type="button">${S.store.mode === 'server' ? 'Descargar CSV' : 'Copiar CSV'}</button>
+        <button class="btn ghost small" id="exportBtn" type="button">${S.store.mode === 'local' ? 'Copiar CSV' : 'Descargar CSV'}</button>
         ${samples ? (S.params.confirmSamples
           ? `<span class="inline-confirm">¿Eliminar ${samples} estudiantes de ejemplo? <button class="btn danger small" id="samplesYes" type="button">Eliminar</button><button class="btn ghost small" data-go="students" type="button">Cancelar</button></span>`
           : `<button class="btn ghost small" id="samplesBtn" type="button">Quitar estudiantes de ejemplo (${samples})</button>`) : ''}
@@ -650,6 +650,12 @@
       document.getElementById('exportBtn').onclick = async () => {
         if (S.store.mode === 'server') { window.location.href = 'api/admin/export.csv?token=' + encodeURIComponent(localStorage.getItem('incol-educa-session-token') || ''); return; }
         const csv = buildCsv(), out = document.getElementById('csvOut');
+        if (S.store.mode === 'supabase') {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' }));
+          a.download = 'incolballet-educa-notas.csv'; document.body.appendChild(a); a.click(); a.remove();
+          return;
+        }
         try { await navigator.clipboard.writeText(csv); S.flash = { ok: 'CSV copiado. Pégalo en Excel o Google Sheets.' }; render(); }
         catch (e) { out.hidden = false; out.value = csv; out.select(); }
       };

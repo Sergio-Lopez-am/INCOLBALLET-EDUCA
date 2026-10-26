@@ -1,0 +1,51 @@
+# Publica la carpeta public/ en GitHub Pages en cada cambio a main.
+# Requisitos (una sola vez): Settings → Pages → Source: "GitHub Actions".
+# Conexión con Supabase: Settings → Secrets and variables → Actions → Variables:
+#   SUPABASE_URL y SUPABASE_ANON_KEY (y opcional EMAIL_DOMAIN).
+# Si las variables no existen, se usa public/js/config.js tal como está en el repositorio.
+name: Publicar en GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Preparar el sitio
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          EMAIL_DOMAIN: ${{ vars.EMAIL_DOMAIN }}
+        run: |
+          mkdir -p _site && cp -r public/. _site/
+          node tools/build-site-config.js _site/js/config.js
+          # Con Supabase la calificación la hace la base de datos: las respuestas no se publican.
+          if grep -q "url: 'https" _site/js/config.js; then node tools/strip-answers.js _site/js/content.js; fi
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

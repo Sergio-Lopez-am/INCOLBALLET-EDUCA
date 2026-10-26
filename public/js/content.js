@@ -621,7 +621,7 @@
     const review = mod.quiz.map((item, i) => {
       const ok = Number(answers[i]) === item.a;
       if (ok) correct++;
-      return { ok, chosen: answers[i] == null ? null : Number(answers[i]) };
+      return { ok, chosen: answers[i] == null ? null : Number(answers[i]), answer: item.a, explain: item.e };
     });
     return { correct, total: mod.quiz.length, score: quizScore(correct, mod.quiz.length), review };
   }
