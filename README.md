@@ -85,7 +85,7 @@ public/js/content.js    Contenido de los módulos, preguntas y reglas de calific
 public/js/core.js       Reglas de negocio compartidas entre navegador y servidor
 public/js/config.js     Conexión con Supabase (URL, llave pública, dominio de correo)
 public/js/store.js      Capa de datos: Supabase, server.js o localStorage, en ese orden
-public/vendor/          supabase-js 2.45.4
+public/vendor/          supabase-js 2.76.1
 public/js/seed.js       Cuentas y datos de ejemplo iniciales
 public/js/app.js        Interfaz
 public/assets/          Logos y fotografía
